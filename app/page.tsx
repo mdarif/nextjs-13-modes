@@ -1,7 +1,21 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import styles from './page.module.css';
 
-export default function Home() {
+async function fetchData() {
+  const res = await fetch(
+    'https://almarfa.in/pokemon/pokemon-main/index.json',
+    { cache: 'no-store' }
+  );
+  // The return value is *not* serialized
+  // You can return Date, Map, Set, etc.
+  const data = await res.json();
+  return data;
+}
+
+export default async function Page() {
+  const data = await fetchData();
+
   return (
     <div className={styles.container}>
       <main className={styles.main}>
@@ -9,35 +23,25 @@ export default function Home() {
           Welcome to Pokemon Modes with{' '}
           <a href='https://nextjs.org'>Next.js 13!</a>
         </h1>
-
-        <p className={styles.description}>
-          Get started by editing{' '}
-          <code className={styles.code}>app/page.tsx</code>
-        </p>
-
         <div className={styles.grid}>
-          <a href='https://beta.nextjs.org/docs' className={styles.card}>
-            <h2>Documentation &rarr;</h2>
-            <p>Find in-depth information about Next.js 13</p>
-          </a>
-
-          <a
-            href='https://github.com/vercel/next.js/tree/canary/examples'
-            className={styles.card}
-          >
-            <h2>Examples &rarr;</h2>
-            <p>Explore the Next.js 13 playground.</p>
-          </a>
-
-          <a
-            href='https://vercel.com/templates/next.js/app-directory?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app'
-            target='_blank'
-            rel='noopener noreferrer'
-            className={styles.card}
-          >
-            <h2>Deploy &rarr;</h2>
-            <p>Deploy your Next.js site to a public URL with Vercel.</p>
-          </a>
+          {data.map((pokemon: any) => {
+            return (
+              <div className={styles.card} key={pokemon.id}>
+                <Link href={`/pokemon/${pokemon.id}`}>
+                  <Image
+                    // loader={myLoader}
+                    src={`https://almarfa.in/pokemon/pokemon-main/${pokemon.image}`}
+                    alt={pokemon.name}
+                    width={200}
+                    height={200}
+                    // priority={true} // When true, the image will be considered high priority and preload. Lazy loading is automatically disabled for images using priority.
+                    priority={pokemon.id <= 20}
+                  />
+                  <h3>{pokemon.name}</h3>
+                </Link>
+              </div>
+            );
+          })}
         </div>
       </main>
 
